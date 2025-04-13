@@ -1,0 +1,6 @@
+services:
+  json-post-box:
+    build: .
+    ports:
+      - "8030:8030"
+    restart: unless-stopped

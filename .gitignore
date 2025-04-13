@@ -1,0 +1,10 @@
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Dependências e diretórios de build
+node_modules/
+build/
+dist/
+*.log
+/.idea/

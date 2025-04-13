@@ -1,0 +1,28 @@
+@host = http://localhost:8030
+@contentType = application/json
+@basePath = /api/v1/jsons
+
+### Armazenar um novo JSON
+POST {{host}}{{basePath}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Exemplo Simples",
+  "description": "Sem scripts de teste",
+  "active": true
+}
+
+### Enviar JSON do arquivo discovery.json
+POST {{host}}{{basePath}}
+Content-Type: {{contentType}}
+
+< ./testdata/data.json
+
+### Recuperar um JSON (substitua {id} pelo ID real)
+GET {{host}}{{basePath}}/1
+Accept: {{contentType}}
+
+
+### Health
+GET {{host}}/api/v1/health
+Content-Type: {{contentType}}

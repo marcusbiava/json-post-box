@@ -1,0 +1,540 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>cmd: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/marcusbiava/json-post-box/cmd/main.go (0.0%)</option>
+				
+				<option value="file1">github.com/marcusbiava/json-post-box/internal/adapter/http/dto/json_dto.go (0.0%)</option>
+				
+				<option value="file2">github.com/marcusbiava/json-post-box/internal/adapter/http/handler/json_handler.go (90.5%)</option>
+				
+				<option value="file3">github.com/marcusbiava/json-post-box/internal/adapter/repository/memory/memory_repository.go (100.0%)</option>
+				
+				<option value="file4">github.com/marcusbiava/json-post-box/internal/domain/json.go (0.0%)</option>
+				
+				<option value="file5">github.com/marcusbiava/json-post-box/internal/infrastructure/server/echo_server.go (0.0%)</option>
+				
+				<option value="file6">github.com/marcusbiava/json-post-box/internal/infrastructure/server/routes.go (0.0%)</option>
+				
+				<option value="file7">github.com/marcusbiava/json-post-box/internal/usecase/json_usecase.go (86.7%)</option>
+				
+				<option value="file8">github.com/marcusbiava/json-post-box/internal/usecase/mocks/mock_json_usecase.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">no coverage</span>
+				<span class="cov1">low coverage</span>
+				<span class="cov2">*</span>
+				<span class="cov3">*</span>
+				<span class="cov4">*</span>
+				<span class="cov5">*</span>
+				<span class="cov6">*</span>
+				<span class="cov7">*</span>
+				<span class="cov8">*</span>
+				<span class="cov9">*</span>
+				<span class="cov10">high coverage</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "context"
+        "log"
+        "os/signal"
+        "syscall"
+
+        "github.com/marcusbiava/json-post-box/internal/adapter/http/handler"
+        "github.com/marcusbiava/json-post-box/internal/adapter/repository/memory"
+        "github.com/marcusbiava/json-post-box/internal/infrastructure/server"
+        "github.com/marcusbiava/json-post-box/internal/usecase"
+)
+
+func main() <span class="cov0" title="0">{
+        port := "8030"
+        // Create context that listens for interrupt signal
+        ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+        defer stop()
+
+        // Initialize dependencies
+        jsonRepo := memory.NewJSONRepository()
+        jsonUsecase := usecase.NewJSONUsecase(jsonRepo)
+        jsonHandler := handler.NewJSONHandler(jsonUsecase)
+
+        // Create and start server
+        srv := server.NewEchoServer(jsonHandler, port)
+
+        if err := srv.Start(ctx); err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("Failed to start server: %v", err)
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package dto
+
+import "github.com/marcusbiava/json-post-box/internal/domain"
+
+// JSONResponse represents the JSON response structure
+type JSONResponse struct {
+        ID   string      `json:"id"`
+        Data interface{} `json:"data"`
+}
+
+// ErrorResponse represents the error response structure
+type ErrorResponse struct {
+        Error string `json:"error"`
+}
+
+// FromDomain converts a domain JSON to a JSONResponse
+func FromDomain(json *domain.JSON) *JSONResponse <span class="cov0" title="0">{
+        if json == nil </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+        <span class="cov0" title="0">return &amp;JSONResponse{
+                ID:   json.ID,
+                Data: json.Data,
+        }</span>
+}
+
+// ToDomain converts a JSONResponse to a domain JSON
+func (r *JSONResponse) ToDomain() *domain.JSON <span class="cov0" title="0">{
+        return &amp;domain.JSON{
+                ID:   r.ID,
+                Data: r.Data,
+        }
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package handler
+
+import (
+        "net/http"
+
+        "github.com/labstack/echo/v4"
+        "github.com/marcusbiava/json-post-box/internal/adapter/http/dto"
+        "github.com/marcusbiava/json-post-box/internal/usecase"
+)
+
+// Context defines the interface for the context
+type Context interface {
+        Bind(i interface{}) error
+        JSON(code int, i interface{}) error
+        Param(name string) string
+}
+
+// EchoContext adapts echo.Context to our Context interface
+type EchoContext struct {
+        ctx echo.Context
+}
+
+func NewEchoContext(c echo.Context) Context <span class="cov10" title="4">{
+        return &amp;EchoContext{ctx: c}
+}</span>
+
+func (c *EchoContext) Bind(i interface{}) error <span class="cov5" title="2">{
+        return c.ctx.Bind(i)
+}</span>
+
+func (c *EchoContext) JSON(code int, i interface{}) error <span class="cov5" title="2">{
+        return c.ctx.JSON(code, i)
+}</span>
+
+func (c *EchoContext) Param(name string) string <span class="cov5" title="2">{
+        return c.ctx.Param(name)
+}</span>
+
+// JSONHandler handles HTTP requests for JSON operations
+type JSONHandler struct {
+        uc usecase.JSONUsecase
+}
+
+// NewJSONHandler creates a new JSONHandler instance
+func NewJSONHandler(uc usecase.JSONUsecase) *JSONHandler <span class="cov5" title="2">{
+        return &amp;JSONHandler{uc: uc}
+}</span>
+
+// Store handles the creation of new JSON documents
+func (h *JSONHandler) Store(c echo.Context) error <span class="cov5" title="2">{
+        ctx := NewEchoContext(c)
+        var jsonData interface{}
+
+        if err := ctx.Bind(&amp;jsonData); err != nil </span><span class="cov1" title="1">{
+                return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON format")
+        }</span>
+
+        <span class="cov1" title="1">storedData, err := h.uc.Store(jsonData)
+        if err != nil </span><span class="cov0" title="0">{
+                return echo.NewHTTPError(http.StatusInternalServerError, "Failed to store JSON")
+        }</span>
+
+        <span class="cov1" title="1">return ctx.JSON(http.StatusCreated, dto.FromDomain(storedData))</span>
+}
+
+// Get handles the retrieval of JSON documents by ID
+func (h *JSONHandler) Get(c echo.Context) error <span class="cov5" title="2">{
+        ctx := NewEchoContext(c)
+        id := ctx.Param("id")
+
+        jsonData, err := h.uc.GetByID(id)
+        if err != nil </span><span class="cov1" title="1">{
+                return echo.NewHTTPError(http.StatusInternalServerError, "Failed to retrieve JSON")
+        }</span>
+
+        <span class="cov1" title="1">if jsonData == nil </span><span class="cov0" title="0">{
+                return echo.NewHTTPError(http.StatusNotFound, "JSON not found")
+        }</span>
+
+        <span class="cov1" title="1">return ctx.JSON(http.StatusOK, jsonData.Data)</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package memory
+
+import (
+        "fmt"
+        "sync"
+
+        "github.com/marcusbiava/json-post-box/internal/domain"
+)
+
+// MemoryJSONRepository implements domain.JSONRepository interface with in-memory storage
+type MemoryJSONRepository struct {
+        data    map[string]*domain.JSON
+        mu      sync.RWMutex
+        counter int
+}
+
+// NewJSONRepository creates a new MemoryJSONRepository instance
+func NewJSONRepository() domain.JSONRepository <span class="cov4" title="2">{
+        return &amp;MemoryJSONRepository{
+                data:    make(map[string]*domain.JSON),
+                counter: 0,
+        }
+}</span>
+
+// Store saves a JSON document in memory
+func (r *MemoryJSONRepository) Store(data *domain.JSON) error <span class="cov10" title="5">{
+        if data == nil </span><span class="cov1" title="1">{
+                return domain.ErrInvalidJSON
+        }</span>
+
+        <span class="cov8" title="4">r.mu.Lock()
+        defer r.mu.Unlock()
+
+        r.counter++
+        data.ID = fmt.Sprintf("%d", r.counter)
+        r.data[data.ID] = data
+        return nil</span>
+}
+
+// FindByID retrieves a JSON document from memory by its ID
+func (r *MemoryJSONRepository) FindByID(id string) (*domain.JSON, error) <span class="cov7" title="3">{
+        if id == "" </span><span class="cov1" title="1">{
+                return nil, domain.ErrInvalidJSON
+        }</span>
+
+        <span class="cov4" title="2">r.mu.RLock()
+        defer r.mu.RUnlock()
+
+        data, exists := r.data[id]
+        if !exists </span><span class="cov1" title="1">{
+                return nil, domain.ErrJSONNotFound
+        }</span>
+
+        <span class="cov1" title="1">return data, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package domain
+
+import (
+        "fmt"
+)
+
+// JSON represents a JSON document entity
+type JSON struct {
+        ID   string      `json:"id"`
+        Data interface{} `json:"data"`
+}
+
+// ErrInvalidJSON is returned when the JSON data is invalid
+var ErrInvalidJSON = fmt.Errorf("invalid JSON data")
+
+// JSONRepository defines the interface for JSON storage operations
+type JSONRepository interface {
+        Store(data *JSON) error
+        FindByID(id string) (*JSON, error)
+}
+
+// Validate checks if the JSON data is valid
+func (j *JSON) Validate() error <span class="cov0" title="0">{
+        if j.Data == nil </span><span class="cov0" title="0">{
+                return ErrInvalidJSON
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package server
+
+import (
+        "context"
+        "github.com/marcusbiava/json-post-box/internal/adapter/http/handler"
+
+        "log"
+        "net/http"
+        "os"
+        "os/signal"
+        "syscall"
+        "time"
+
+        "github.com/labstack/echo/v4"
+)
+
+type EchoServer struct {
+        e      *echo.Echo
+        port   string
+        server *http.Server
+}
+
+func NewEchoServer(h *handler.JSONHandler, port string) *EchoServer <span class="cov0" title="0">{
+        e := echo.New()
+        SetupRoutes(e, h)
+
+        return &amp;EchoServer{
+                e:    e,
+                port: ":" + port,
+                server: &amp;http.Server{
+                        Addr:    ":" + port,
+                        Handler: e,
+                },
+        }
+}</span>
+
+func (s *EchoServer) Start(ctx context.Context) error <span class="cov0" title="0">{
+        // Channel to listen for errors
+        errChan := make(chan error, 1)
+
+        // Start server in a goroutine
+        go func() </span><span class="cov0" title="0">{
+                log.Printf("Starting server on %s", s.port)
+                if err := s.server.ListenAndServe(); err != nil &amp;&amp; err != http.ErrServerClosed </span><span class="cov0" title="0">{
+                        errChan &lt;- err
+                }</span>
+        }()
+
+        // Wait for interrupt signal or context cancellation
+        <span class="cov0" title="0">quit := make(chan os.Signal, 1)
+        signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+
+        select </span>{
+        case &lt;-ctx.Done():<span class="cov0" title="0">
+                log.Println("Server shutdown by context")</span>
+        case err := &lt;-errChan:<span class="cov0" title="0">
+                log.Printf("Server error: %v", err)
+                return err</span>
+        case &lt;-quit:<span class="cov0" title="0">
+                log.Println("Server shutdown by signal")</span>
+        }
+
+        // Create shutdown context with timeout
+        <span class="cov0" title="0">shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+        defer cancel()
+
+        // Graceful shutdown
+        if err := s.server.Shutdown(shutdownCtx); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">log.Println("Server stopped gracefully")
+        return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package server
+
+import (
+        "github.com/labstack/echo/v4"
+        "github.com/marcusbiava/json-post-box/internal/adapter/http/handler"
+)
+
+// SetupRoutes configures all application routes
+func SetupRoutes(e *echo.Echo, h *handler.JSONHandler) <span class="cov0" title="0">{
+        // API v1 routes
+        v1 := e.Group("/api/v1")
+        </span><span class="cov0" title="0">{
+                // JSON endpoints
+                v1.POST("/jsons", h.Store)
+                v1.GET("/jsons/:id", h.Get)
+
+                // Health check
+                v1.GET("/health", func(c echo.Context) error </span><span class="cov0" title="0">{
+                        return c.JSON(200, map[string]string{"status": "healthy"})
+                }</span>)
+        }
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package usecase
+
+import (
+        "github.com/marcusbiava/json-post-box/internal/domain"
+)
+
+// JSONUsecase defines the interface for JSON operations
+type JSONUsecase interface {
+        Store(data interface{}) (*domain.JSON, error)
+        GetByID(id string) (*domain.JSON, error)
+}
+
+type jsonUsecase struct {
+        repo domain.JSONRepository
+}
+
+// NewJSONUsecase creates a new JSONUsecase instance
+func NewJSONUsecase(repo domain.JSONRepository) JSONUsecase <span class="cov10" title="5">{
+        return &amp;jsonUsecase{repo: repo}
+}</span>
+
+func (uc *jsonUsecase) Store(data interface{}) (*domain.JSON, error) <span class="cov7" title="3">{
+        if data == nil </span><span class="cov1" title="1">{
+                return nil, domain.ErrInvalidJSON
+        }</span>
+
+        <span class="cov4" title="2">jsonData := &amp;domain.JSON{
+                Data: data,
+        }
+
+        if err := jsonData.Validate(); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov4" title="2">if err := uc.repo.Store(jsonData); err != nil </span><span class="cov1" title="1">{
+                return nil, domain.ErrStorageFailure
+        }</span>
+
+        <span class="cov1" title="1">return jsonData, nil</span>
+}
+
+func (uc *jsonUsecase) GetByID(id string) (*domain.JSON, error) <span class="cov4" title="2">{
+        jsonData, err := uc.repo.FindByID(id)
+        if err != nil </span><span class="cov1" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov1" title="1">if jsonData == nil </span><span class="cov0" title="0">{
+                return nil, domain.ErrJSONNotFound
+        }</span>
+        <span class="cov1" title="1">return jsonData, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package mocks
+
+import (
+        "github.com/marcusbiava/json-post-box/internal/domain"
+        "github.com/stretchr/testify/mock"
+)
+
+type MockJSONUsecase struct {
+        mock.Mock
+}
+
+func (m *MockJSONUsecase) Store(data map[string]interface{}) (*domain.JSON, error) <span class="cov0" title="0">{
+        args := m.Called(data)
+        return args.Get(0).(*domain.JSON), args.Error(1)
+}</span>
+
+func (m *MockJSONUsecase) GetByID(id string) (*domain.JSON, error) <span class="cov0" title="0">{
+        args := m.Called(id)
+        return args.Get(0).(*domain.JSON), args.Error(1)
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
